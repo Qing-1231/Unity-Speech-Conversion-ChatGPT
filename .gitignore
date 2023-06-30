@@ -1,0 +1,4 @@
+# ignore .meta file
+*.meta
+# ignore Keys.txt
+Keys.txt
