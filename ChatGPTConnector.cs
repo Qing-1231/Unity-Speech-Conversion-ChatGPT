@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using ChatGPT;
 using BaiduTTS;
 using System;
+using System.Collections.Generic;
 
 public class ChatGPTConnector : MonoBehaviour
 {
@@ -15,11 +16,13 @@ public class ChatGPTConnector : MonoBehaviour
     public Text outputText; // Êä³öÎÄ±¾¿ò
     public SpeechSynthesis speechSynthesis;
     public AudioSource audioSource;
+    private List<string> historyMessage;
 
     private void Awake()
     {
         speechSynthesis = GetComponent<SpeechSynthesis>();
         apiKey = API_KEYManager.Instance.GetChatGPTAPIKey();
+        historyMessage = new List<string>();
     }
 
     public IEnumerator SendRequestAndPlayVoice(Action<AudioClip> callback)
@@ -44,7 +47,7 @@ public class ChatGPTConnector : MonoBehaviour
         //audioSource.clip = ResourceManager.Instance.LoadAudioClip("Audio/output");
         audioSource.Play();
     }
-
+    
     private AudioClip GetAudioCallback(AudioClip audioClip)
     {
         return audioClip;
@@ -53,10 +56,16 @@ public class ChatGPTConnector : MonoBehaviour
     private IEnumerator SendRequest(string userInput)
     {
         var request = new UnityWebRequest(chatGPTAPIURL, "POST");
-        PostData _postData = new PostData(userInput);
+
+        historyMessage.Add(userInput);
+        foreach(string mess in historyMessage)
+        {
+            Debug.Log(mess);
+        }
+        PostData _postData = new PostData(historyMessage);
 
         string _jsonText = JsonConvert.SerializeObject(_postData);
-        //Debug.Log(_jsonText);
+        Debug.Log(_jsonText);
 
         // Serialize _jsonText to byte[] data
         byte[] data = System.Text.Encoding.UTF8.GetBytes(_jsonText);
@@ -81,7 +90,7 @@ public class ChatGPTConnector : MonoBehaviour
             {
                 string getReply = responseObject.Choices[0].Message?.Content;
                 Debug.Log(getReply);
-
+                
                 outputText.text = getReply;
             }
         }
