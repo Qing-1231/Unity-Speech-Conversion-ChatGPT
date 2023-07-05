@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 namespace ChatGPT
 {
@@ -18,7 +19,27 @@ namespace ChatGPT
         public float temperature;
 
         //重载CreatePostData函数
-        public PostData(string message) 
+        public PostData(List<string> historyMessage)
+        {
+            model = "gpt-3.5-turbo";
+            int messageSize = historyMessage.Count + 1;
+            messages = new Message[messageSize];
+            messages[0] = new Message
+            {
+                Role = "system",
+                Content = "你现在是一个聊天机器人，说话尽量口语化，每句话尽量简短，以符合聊天对话的场景。"
+            };
+            for(int i = 1; i < messageSize; i++)
+            {
+                messages[i] = new Message
+                {
+                    Role = "user",
+                    Content = historyMessage[i - 1]
+                };
+            }
+            temperature = 0.7f;
+        }
+        public PostData(string message)
         {
             InitializePostData(message, 0.7f);
         }
